@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<package format="2">
+
+  <name>gidisizi</name>
+  <version>0.0.1</version>
+  <description>None</description>
+  <license>Proprietary</license>
+
+  <maintainer email="m.efetiryaki@gmail.com">Mehmet Efe Tiryaki</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>boost</depend>
+  <depend>eigen</depend>
+  <depend>roscpp</depend>
+
+</package>
