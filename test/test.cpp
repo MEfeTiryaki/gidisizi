@@ -4,14 +4,14 @@
 #include "gidisizi/RRT.hpp"
 
 int counter = 0;
-
+using NodeType_ = gidisizi::Node<2>;
 void testNode()
 {
-  gidisizi::Node* node_1 = new gidisizi::Node();
-  gidisizi::Node* node_2 = new gidisizi::Node(2);
-  gidisizi::Node* node_3 = new gidisizi::Node(3, Eigen::VectorXd::Ones(5) * 5);
-  gidisizi::Node* node_4 = new gidisizi::Node(4, Eigen::VectorXd::Ones(5) * 4, node_3);
-  gidisizi::Node* node_5 = new gidisizi::Node(5, Eigen::VectorXd::Ones(5) * 2, node_3);
+  NodeType_* node_1 = new NodeType_();
+  NodeType_* node_2 = new NodeType_(2);
+  NodeType_* node_3 = new NodeType_(3, Eigen::VectorXd::Ones(2) * 5);
+  NodeType_* node_4 = new NodeType_(4, Eigen::VectorXd::Ones(2) * 4, node_3);
+  NodeType_* node_5 = new NodeType_(5, Eigen::VectorXd::Ones(2) * 2, node_3);
   if (node_1->getId() != 0) {
     std::cerr << "1 - Node() constructor: id assignment not working properly" << std::endl;
   }
@@ -58,7 +58,7 @@ void testNode()
         << "10 - Node(int,Eigen::VectorXd,gidisizi::Node) constructor: parent assignment not working properly"
         << std::endl;
   }
-  if (node_3->getchildren().size() != 2) {
+  if (node_3->getChildren().size() != 2) {
     std::cerr
         << "11 - Node(int,Eigen::VectorXd,gidisizi::Node) constructor: parent assignment not working properly"
         << std::endl;
@@ -66,12 +66,16 @@ void testNode()
 }
 
 void testRRT(){
-  gidisizi::RRT RRT = gidisizi::RRT();
+  gidisizi::RRT<NodeType_> RRT = gidisizi::RRT<NodeType_>();
   int nodeId = 0 ;
-  gidisizi::Node q_init = gidisizi::Node(nodeId++, Eigen::VectorXd::Ones(5) * 0);
-  gidisizi::Node q_goal = gidisizi::Node(nodeId++, Eigen::VectorXd::Ones(5) * 2);
-
-  RRT.initilize(q_init,q_goal,100,1.0);
+  NodeType_* q_init = new NodeType_(nodeId++, Eigen::VectorXd::Ones(2) * 0);
+  NodeType_* q_goal = new NodeType_(nodeId++, Eigen::VectorXd::Ones(2) * 0.5);
+  Eigen::VectorXd upper = Eigen::VectorXd::Ones(2);
+  Eigen::VectorXd lower = -Eigen::VectorXd::Ones(2);
+  Eigen::VectorXd accuracy = 0.05*Eigen::VectorXd::Ones(2);
+  RRT.initilize(q_init,q_goal,accuracy,upper,lower,10000,5.0);
+  RRT.Plan();
+  RRT.drawGraph();
 }
 int main(int argc, char **argv)
 {

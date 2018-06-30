@@ -10,7 +10,7 @@ find_package(catkin REQUIRED
 
 # to use eigen library
 find_package(Eigen3 REQUIRED)
-
+find_package(OpenCV)
 catkin_package(
   INCLUDE_DIRS
   	include
@@ -23,30 +23,37 @@ catkin_package(
 
 include_directories(
   include
-	${EIGEN3_INCLUDE_DIR}
+  ${EIGEN3_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
-)
-add_library(
-  ${PROJECT_NAME}
-  src/Node.cpp
-  src/RRT.cpp
+  ${OpenCV_INCLUDE_DIRS}
 )
 
-add_dependencies(${PROJECT_NAME}
-  ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
+#add_library(
+#  ${PROJECT_NAME}
+#)
 
-add_executable(iyileme_test
+#add_dependencies(${PROJECT_NAME}
+#  ${catkin_EXPORTED_TARGETS}
+#)
+#target_link_libraries(${PROJECT_NAME}
+#  ${catkin_LIBRARIES}
+#  ${OpenCV_LIBRARIES}
+#)
+
+
+add_executable(gidisizi_test
   test/test.cpp
 )
-add_dependencies(iyileme_test
-  ${PROJECT_NAME}
+add_dependencies(gidisizi_test
   ${catkin_EXPORTED_TARGETS}
 )
-target_link_libraries(iyileme_test
-  ${PROJECT_NAME}
+target_link_libraries(gidisizi_test
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
+
+install(
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+

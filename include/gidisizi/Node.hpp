@@ -5,6 +5,8 @@
 #include "Eigen/Dense"
 
 namespace gidisizi {
+
+template<int stateLength>
 class Node
 {
  public:
@@ -15,7 +17,7 @@ class Node
 
   Node(int id, Eigen::VectorXd state);
 
-  Node(int id, Eigen::VectorXd state, gidisizi::Node* parent);
+  Node(int id, Eigen::VectorXd state, gidisizi::Node<stateLength>* parent);
 
   // Destructor.
   virtual ~Node();
@@ -25,15 +27,15 @@ class Node
   }
   ;
 
-  virtual void addchild(gidisizi::Node* child);
+  virtual void addChild(gidisizi::Node<stateLength>* child);
 
-  std::vector<gidisizi::Node*> getchildren();
+  std::vector<gidisizi::Node<stateLength>*> getChildren();
 
-  gidisizi::Node* getChild(int id);
+  gidisizi::Node<stateLength>* getChild(int id);
 
-  void setParent(gidisizi::Node* parent);
+  void setParent(gidisizi::Node<stateLength>* parent);
 
-  gidisizi::Node* getParent();
+  gidisizi::Node<stateLength>* getParent();
 
   Eigen::VectorXd getState();
 
@@ -47,7 +49,8 @@ class Node
   int id_;
   Eigen::VectorXd state_;
 
-  std::vector<gidisizi::Node*> children_;
-  gidisizi::Node* parent_;
+  std::vector<gidisizi::Node<stateLength>*> children_;
+  gidisizi::Node<stateLength>* parent_;
 };
 }  // gidisizi
+#include "gidisizi/Node.tpp"

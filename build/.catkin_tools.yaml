@@ -1,0 +1,6 @@
+devel_space: /home/efe/git/gidisizi/devel
+install: false
+install_space: /home/efe/git/gidisizi/install
+profile: default
+source_space: /home/efe/git/gidisizi/src
+workspace: /home/efe/git/gidisizi

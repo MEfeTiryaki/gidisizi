@@ -14,5 +14,6 @@
   <depend>boost</depend>
   <depend>eigen</depend>
   <depend>roscpp</depend>
+  <depend>opencv2</depend>
 
 </package>
