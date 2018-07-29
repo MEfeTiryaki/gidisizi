@@ -1,27 +1,30 @@
-#include "gidisizi/RRT.hpp"
+#include "gidisizi/RRTStarNoRepair.hpp"
 
 namespace gidisizi {
 
-template<typename NodeType>
-RRT<NodeType>::RRT()
-    : qInit_(),
+template<typename NodeType, typename Environment>
+RRTStarNoRepair<NodeType, Environment>::RRTStarNoRepair()
+    : environment_(),
+      qInit_(),
       qGoal_(),
       maxTime_(10.0),
-      maxIteration_(1000)
+      maxIteration_(1000),
+      solutionNode_()
 {
 }
 
-template<typename NodeType>
-RRT<NodeType>::~RRT()
+template<typename NodeType, typename Environment>
+RRTStarNoRepair<NodeType, Environment>::~RRTStarNoRepair()
 {
 }
 
-template<typename NodeType>
-void RRT<NodeType>::initilize(NodeType* q_init, NodeType* q_goal, Eigen::VectorXd solutionAccuracy,
-                              Eigen::VectorXd upper, Eigen::VectorXd lower, int maxIteration,
-                              double maxTime)
+template<typename NodeType, typename Environment>
+void RRTStarNoRepair<NodeType, Environment>::initilize(Environment* environment, NodeType* q_init,
+                                               NodeType* q_goal, Eigen::VectorXd solutionAccuracy,
+                                               Eigen::VectorXd upper, Eigen::VectorXd lower,
+                                               int maxIteration, double maxTime)
 {
-
+  environment_ = environment;
   qInit_ = q_init;
   qGoal_ = q_goal;
   solutionAccuracy_ = solutionAccuracy;
@@ -36,20 +39,21 @@ void RRT<NodeType>::initilize(NodeType* q_init, NodeType* q_goal, Eigen::VectorX
   G_.addVertex(qInit_);
 }
 
-template<typename NodeType>
-void RRT<NodeType>::advance()
+template<typename NodeType, typename Environment>
+void RRTStarNoRepair<NodeType, Environment>::advance()
 {
 
 }
 
-template<typename NodeType>
-bool RRT<NodeType>::Plan()
+template<typename NodeType, typename Environment>
+bool RRTStarNoRepair<NodeType, Environment>::Plan()
 {
   bool success = true;
   int nodeId = 2;
   int iter = 0;
   double startTime = clock();
   while (true) {
+    std::cerr<<"\t"<<iter<<std::endl;
     if (!(iter < maxIteration_)) {
       std::cout << "Planner exceeded maximum iteration number." << std::endl;
       break;
@@ -65,10 +69,24 @@ bool RRT<NodeType>::Plan()
     NodeType* qNew = new NodeType(nodeId++, Eigen::VectorXd::Zero(2));
 
     drawRandomConfiguration(qRandom);
+    //std::cerr<<"random : "<<qRandom.getState().transpose()<<std::endl;
+
     G_.getNearestVertex(qNearest, qRandom);
-    while (!steer(qNew, qNearest, qRandom, 1.0)) {
+    //std::cerr<<"nearest : "<<qNearest->getState().transpose()<<std::endl;
+
+    if(steer(qNew, qNearest, qRandom, 0.2)) {
+      continue;
     }
-    qNearest->addChild(qNew);
+    //std::cerr<<"steer : "<<qNew->getState().transpose()<<std::endl;
+
+    if(!findNearNodes(qNew,0.5)){
+      //std::cerr<<"No near node"<<std::endl;
+      continue;
+    }
+    //std::cerr<<"number of close nodes : "<<qNew->getNumberOfCloseNodes()<<std::endl;
+
+    lowestCostNeighbor(qNew)->addChild(qNew);
+
     G_.addVertex(qNew);
     G_.addEdge(qNearest, qNew);
     if (isGoalReached(qNew)) {
@@ -78,11 +96,13 @@ bool RRT<NodeType>::Plan()
     iter++;
   }
   backTrackPath();
+  std::cerr << "Planning duration : " << (clock() - startTime) / double(CLOCKS_PER_SEC)
+            << std::endl;
   return success;
 }
 
-template<typename NodeType>
-void RRT<NodeType>::backTrackPath()
+template<typename NodeType, typename Environment>
+void RRTStarNoRepair<NodeType, Environment>::backTrackPath()
 {
   NodeType* cursor = solutionNode_;
   path_.push_back(cursor);
@@ -93,8 +113,8 @@ void RRT<NodeType>::backTrackPath()
   std::reverse(std::begin(path_), std::end(path_));
 }
 
-template<typename NodeType>
-void RRT<NodeType>::drawRandomConfiguration(NodeType& q)
+template<typename NodeType, typename Environment>
+void RRTStarNoRepair<NodeType, Environment>::drawRandomConfiguration(NodeType& q)
 {
   Eigen::VectorXd mid = (upper_ + lower_) / 2;
   Eigen::VectorXd length = (upper_ - lower_) / 2;
@@ -109,15 +129,50 @@ void RRT<NodeType>::drawRandomConfiguration(NodeType& q)
   q.setState(conf);
 }
 
-template<typename NodeType>
-bool RRT<NodeType>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand, double deltaQ)
+template<typename NodeType, typename Environment>
+bool RRTStarNoRepair<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand,
+                                           double deltaQ)
 {
   qNew->setState(qNear->getState() + deltaQ * (qRand.getState() - qNear->getState()));
-  return true;
+  return environment_->checkCollisions(qNear->getState(), qNew->getState());
 }
 
-template<typename NodeType>
-bool RRT<NodeType>::isGoalReached(NodeType* qNew)
+template<typename NodeType, typename Environment>
+bool RRTStarNoRepair<NodeType, Environment>::findNearNodes(NodeType* qNew, double distance)
+{
+  for (auto n : G_.getVerteces()) {
+    //std::cerr<<"distance : "<<(qNew->getState() - n->getState()).squaredNorm()<<std::endl;
+    //std::cerr<<"collision : "<<environment_->checkCollisions(n->getState(), qNew->getState())<<std::endl;
+
+    if ((qNew->getState() - n->getState()).squaredNorm() < distance
+        && !environment_->checkCollisions(n->getState(), qNew->getState())) {
+      //std::cerr<<"node added"<<std::endl;
+      qNew->addCloseNode(n);
+    }
+  }
+
+  return qNew->getNumberOfCloseNodes();
+}
+
+template<typename NodeType, typename Environment>
+NodeType* RRTStarNoRepair<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
+{
+  NodeType* qNearest;
+  double cost = 100000.0 ;
+  double newCost = 1000.0 ;
+  for (auto n : qNew->getCloseNodes()) {
+    newCost = n->getCost()+ (qNew->getState() - n->getState()).squaredNorm();
+    if (newCost < cost) {
+      qNearest = n;
+      cost = newCost;
+    }
+  }
+  qNew->setCost(cost);
+  return qNearest;
+}
+
+template<typename NodeType, typename Environment>
+bool RRTStarNoRepair<NodeType, Environment>::isGoalReached(NodeType* qNew)
 {
   Eigen::VectorXd state = qNew->getState();
   Eigen::VectorXd goalState = qGoal_->getState();
@@ -131,8 +186,8 @@ bool RRT<NodeType>::isGoalReached(NodeType* qNew)
   return true;
 }
 
-template<typename NodeType>
-bool RRT<NodeType>::isGoalReachable()
+template<typename NodeType, typename Environment>
+bool RRTStarNoRepair<NodeType, Environment>::isGoalReachable()
 {
   Eigen::VectorXd goalState = qGoal_->getState();
   for (int i = 0; i < goalState.size(); i++) {
@@ -145,8 +200,8 @@ bool RRT<NodeType>::isGoalReachable()
   return true;
 }
 
-template<typename NodeType>
-void RRT<NodeType>::drawGraph()
+template<typename NodeType, typename Environment>
+void RRTStarNoRepair<NodeType, Environment>::drawGraph()
 {
   int w = 800;
   int thickness = 2;
@@ -154,9 +209,16 @@ void RRT<NodeType>::drawGraph()
   cv::Scalar graphColor = cv::Scalar(255, 255, 255);
   cv::Scalar solution = cv::Scalar(0, 255, 0);
   cv::Scalar goalcolor = cv::Scalar(255, 0, 255);
+  cv::Scalar wallcolor = cv::Scalar(0, 0, 255);
 
   cv::Mat img = cv::Mat::zeros(w, w, CV_8UC3);
 
+  for (auto wall : environment_->getWalls()) {
+    cv::rectangle(img, cv::Point(w / 2 * (1 + (wall.point1[0])), w / 2 * (1 - (wall.point1[1]))),
+                  cv::Point(w / 2 * (1 + (wall.point2[0])), w / 2 * (1 - (wall.point2[1]))),
+                  wallcolor);
+  }
+  // Goal
   cv::rectangle(
       img,
       cv::Point(w / 2 * (1 + (qGoal_->getState()[0] - solutionAccuracy_[0])),
@@ -189,4 +251,3 @@ void RRT<NodeType>::drawGraph()
 
 }
 /* namespace iyi*/
-

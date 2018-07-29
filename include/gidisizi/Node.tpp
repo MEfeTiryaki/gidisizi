@@ -9,14 +9,15 @@ Node<stateLength>::Node()
 }
 template<int stateLength>
 Node<stateLength>::Node(int id)
-    : Node(id, Eigen::VectorXd(stateLength))
+    : Node(id, Eigen::VectorXd::Zero(stateLength))
 {
 }
 
 template<int stateLength>
 Node<stateLength>::Node(int id, Eigen::VectorXd state)
     : id_(id),
-      state_(state)
+      state_(state),
+      cost_(0.0)
 {
   parent_ = this ;
 }
@@ -24,7 +25,8 @@ template<int stateLength>
 Node<stateLength>::Node(int id, Eigen::VectorXd state, gidisizi::Node<stateLength>* parent)
     : id_(id),
       state_(state),
-      parent_(parent)
+      parent_(parent),
+      cost_(0.0)
 {
   parent->addChild(this);
 }
@@ -87,6 +89,29 @@ template<int stateLength>
 void Node<stateLength>::setId(int id)
 {
   id_ = id;
+}
+template<int stateLength>
+void Node<stateLength>::setCost(double cost) {
+  cost_=cost;
+}
+
+template<int stateLength>
+double Node<stateLength>::getCost(){
+  return cost_;
+}
+
+template<int stateLength>
+void Node<stateLength>::addCloseNode(gidisizi::Node<stateLength>* node){
+  closeNodes_.push_back(node);
+}
+
+template<int stateLength>
+std::vector<gidisizi::Node<stateLength>*> Node<stateLength>::getCloseNodes(){
+  return closeNodes_;
+}
+template<int stateLength>
+int Node<stateLength>::getNumberOfCloseNodes(){
+  return closeNodes_.size();
 }
 
 } /* namespace iyi*/

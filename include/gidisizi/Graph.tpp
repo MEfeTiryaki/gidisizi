@@ -1,4 +1,4 @@
-#include "gidisizi/Graph.hpp"
+//#include "gidisizi/Graph.hpp"
 
 namespace gidisizi {
 template<typename NodeType>
@@ -45,6 +45,10 @@ std::vector<gidisizi::Edge<NodeType>> Graph<NodeType>::getEdges()
   return edges_;
 }
 
+template<typename NodeType>
+std::vector<NodeType*> Graph<NodeType>::getVerteces(){
+  return verteces_;
+}
 template<typename NodeType>
 void Graph<NodeType>::getNearestVertex(NodeType*& nearestVertex, NodeType& v_new)
 {

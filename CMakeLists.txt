@@ -52,8 +52,40 @@ target_link_libraries(gidisizi_test
   ${OpenCV_LIBRARIES}
 )
 
+add_executable(rrt
+  test/testRRT.cpp
+)
+add_dependencies(rrt
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(rrt
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_executable(rrt_star
+  test/testRRTStar.cpp
+)
+add_dependencies(rrt_star
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(rrt_star
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_executable(rrt_rewired
+  test/testRRTRewired.cpp
+)
+add_dependencies(rrt_rewired
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(rrt_rewired
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
-

@@ -30,6 +30,8 @@ class Graph
   virtual void addEdge(gidisizi::Edge<NodeType> edge);
   virtual std::vector<gidisizi::Edge<NodeType>> getEdges();
 
+  virtual std::vector<NodeType*> getVerteces();
+
   virtual void getNearestVertex(NodeType*& qNear,NodeType& v);
 
  protected:

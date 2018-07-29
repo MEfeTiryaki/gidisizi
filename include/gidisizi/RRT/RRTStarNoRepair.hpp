@@ -18,16 +18,16 @@
 #include "gidisizi/Graph.hpp"
 
 namespace gidisizi {
-template<typename NodeType>
-class RRT
+template<typename NodeType,typename Environment>
+class RRTStarNoRepair
 {
  public:
   // Constructor.
-  RRT();
+  RRTStarNoRepair();
   // Destructor.
-  virtual ~RRT();
+  virtual ~RRTStarNoRepair();
   // Init
-  virtual void initilize(NodeType* q_init, NodeType* q_goal, Eigen::VectorXd solutionAccuracy,
+  virtual void initilize(Environment* environment,NodeType* q_init, NodeType* q_goal, Eigen::VectorXd solutionAccuracy,
                          Eigen::VectorXd upper, Eigen::VectorXd lower, int maxIteration,
                          double maxTime);
 
@@ -36,7 +36,27 @@ class RRT
   virtual bool Plan();
 
   virtual void drawGraph();
-
+  virtual NodeType* getInit(){
+    return qInit_;
+  }
+  virtual NodeType* getGoal(){
+    return qGoal_;
+  }
+  virtual Eigen::VectorXd getSolutionAccuracy(){
+    return solutionAccuracy_;
+  }
+  virtual std::vector<NodeType*> getPath(){
+    return path_;
+  };
+  virtual std::vector<std::vector<NodeType*>> getDebugPaths(){
+    return debugPaths_;
+  };
+  virtual gidisizi::Graph<NodeType> getGraph(){
+    return G_;
+  };
+  virtual std::vector<gidisizi::Graph<NodeType>> getDebugGraphes(){
+    return debugGraphes_;
+  };
  protected:
 
   virtual void drawRandomConfiguration(NodeType& q);
@@ -45,6 +65,8 @@ class RRT
   virtual bool isGoalReachable();
   virtual void backTrackPath();
 
+  virtual bool findNearNodes(NodeType* qNew, double distance);
+  virtual NodeType* lowestCostNeighbor(NodeType* qNew);
   NodeType* qInit_;
   NodeType* qGoal_;
   NodeType* solutionNode_;
@@ -54,9 +76,10 @@ class RRT
   Eigen::VectorXd lower_;
   gidisizi::Graph<NodeType> G_ ;
 
+  Environment* environment_;
   int maxIteration_;
   double maxTime_;
 
 };
 }  // gidisizi
-#include "gidisizi/RRT.tpp"
+#include "gidisizi/RRTStarNoRepair.tpp"

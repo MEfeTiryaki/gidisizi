@@ -45,12 +45,24 @@ class Node
 
   void setId(int id);
 
+  void setCost(double cost) ;
+
+  double getCost();
+
+  void addCloseNode(gidisizi::Node<stateLength>* node);
+  std::vector<gidisizi::Node<stateLength>*> getCloseNodes();
+  int getNumberOfCloseNodes();
  protected:
   int id_;
   Eigen::VectorXd state_;
 
+  double cost_;
+
   std::vector<gidisizi::Node<stateLength>*> children_;
   gidisizi::Node<stateLength>* parent_;
+
+  std::vector<gidisizi::Node<stateLength>*> closeNodes_;
+
 };
 }  // gidisizi
 #include "gidisizi/Node.tpp"
