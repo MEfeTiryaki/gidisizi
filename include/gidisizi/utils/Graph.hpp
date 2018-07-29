@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gidisizi/Node.hpp"
+#include "gidisizi/utils/Node.hpp"
 #include <vector>
 #include "Eigen/Dense"
 
@@ -41,4 +41,4 @@ class Graph
 };
 }  // gidisizi
 
-#include "gidisizi/Graph.tpp"
+#include "gidisizi/utils/Graph.tpp"

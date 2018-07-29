@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gidisizi/Node.hpp"
+#include "gidisizi/utils/Node.hpp"
 #include <vector>
 #include "Eigen/Dense"
 
@@ -52,22 +52,6 @@ class Environment2d
   virtual bool checkCollisions(Eigen::Vector2d start, Eigen::Vector2d end)
   {
     for (auto w :walls_) {
-      //std::cerr<<"wall : "<<w.point1.transpose()<<" / "<<w.point2.transpose()<<std::endl;
-      /*
-      if (start[0]>w.point2[0] && end[0]>w.point2[0]){
-        return false;
-      }
-      if (start[0]<w.point1[0] && end[0]<w.point1[0]){
-        return false;
-      }
-      if (start[1]>w.point2[1] && end[1]>w.point2[1]){
-        return false;
-      }
-      if (start[1]<w.point1[1] && end[1]<w.point1[1]) {
-        return false;
-      }
-      */
-
       if((start[0]>w.point2[0] && end[0]<w.point2[0])
       &&(end[1]<w.point2[1] && end[1]>w.point1[1])){
         return true;

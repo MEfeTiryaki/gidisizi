@@ -1,8 +1,6 @@
 #include "ros/ros.h"
 #include <iostream>
-#include "gidisizi/Node.hpp"
-#include "gidisizi/RRT/RRT.hpp"
-#include "gidisizi/RRT/RRTStar.hpp"
+#include "gidisizi/utils/Node.hpp"
 #include "gidisizi/RRT/RRTX.hpp"
 #include "gidisizi/Environment2D.hpp"
 #include "gidisizi/utils/visualization.hpp"

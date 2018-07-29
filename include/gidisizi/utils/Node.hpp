@@ -1,6 +1,4 @@
 #pragma once
-
-#include "gidisizi/Node.hpp"
 #include <vector>
 #include "Eigen/Dense"
 
@@ -65,4 +63,4 @@ class Node
 
 };
 }  // gidisizi
-#include "gidisizi/Node.tpp"
+#include "gidisizi/utils/Node.tpp"

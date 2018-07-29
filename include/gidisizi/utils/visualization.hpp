@@ -14,8 +14,8 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/highgui/highgui.hpp>
 
-#include "gidisizi/Node.hpp"
-#include "gidisizi/Graph.hpp"
+#include "gidisizi/utils/Node.hpp"
+#include "gidisizi/utils/Graph.hpp"
 
 
 namespace path_vis{
