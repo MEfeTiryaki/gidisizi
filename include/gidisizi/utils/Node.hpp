@@ -50,6 +50,11 @@ class Node
   void addCloseNode(gidisizi::Node<stateLength>* node);
   std::vector<gidisizi::Node<stateLength>*> getCloseNodes();
   int getNumberOfCloseNodes();
+
+  void addLessCloseNode(gidisizi::Node<stateLength>* node);
+  std::vector<gidisizi::Node<stateLength>*> getLessCloseNodes();
+  int getNumberOfLessCloseNodes();
+  
  protected:
   int id_;
   Eigen::VectorXd state_;
@@ -60,6 +65,7 @@ class Node
   gidisizi::Node<stateLength>* parent_;
 
   std::vector<gidisizi::Node<stateLength>*> closeNodes_;
+  std::vector<gidisizi::Node<stateLength>*> lessCloseNodes_;
 
 };
 }  // gidisizi

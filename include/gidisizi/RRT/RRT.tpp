@@ -42,11 +42,13 @@ bool RRT<NodeType, Environment>::Plan()
     NodeType qRandom = NodeType();
     //qRandom.setState(Eigen::VectorXd::Zero(2));
     NodeType* qNearest;
-    NodeType* qNew = new NodeType(nodeId++, Eigen::VectorXd::Zero(2));
+    NodeType* qNew = new NodeType(iter);
 
     this->drawRandomConfiguration(qRandom);
+
     this->G_.getNearestVertex(qNearest, qRandom);
-    if(steer(qNew, qNearest, qRandom, 0.4/(sqrt(iter/20)+1)+0.3)) {
+
+    if(steer(qNew, qNearest, qRandom)) {
       continue;
     }
 
@@ -70,7 +72,8 @@ bool RRT<NodeType, Environment>::Plan()
       this->debugPaths_.push_back(this->backTrackPath(qNew));
       debugingTime += (clock()-t);
       foundSolution = true;
-    }else{
+    }
+    else{
       // Debug
       double t = clock();
       if(foundSolution){
@@ -92,10 +95,20 @@ bool RRT<NodeType, Environment>::Plan()
 }
 
 template<typename NodeType, typename Environment>
-bool RRT<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand,
-                                        double deltaQ)
+bool RRT<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
 {
+  //double deltaQ = 0.4/(sqrt(qNew->getId()/20)+1)+0.3;
+  int n = qNear->getState().size();
+  Eigen::MatrixXd deltaQ = Eigen::MatrixXd::Zero(n,n);
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  deltaQ.diagonal() = Eigen::VectorXd::Ones(n)*distribution(generator);
   qNew->setState(qNear->getState() + deltaQ * (qRand.getState() - qNear->getState()));
+  int trial = 1 ;
+  while(trial++<5 && this->environment_->checkCollisions(qNear->getState(), qNew->getState())){
+    qNew->setState(qNear->getState() + deltaQ/pow(2,trial) * (qRand.getState() - qNear->getState()));
+  }
   return this->environment_->checkCollisions(qNear->getState(),qNew->getState());
 }
 

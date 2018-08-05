@@ -1,20 +1,19 @@
-#include "gidisizi/RRT/RRTStar.hpp"
+#include "gidisizi/examples/StateSpacePlan.hpp"
 
 namespace gidisizi {
 
 template<typename NodeType, typename Environment>
-RRTStar<NodeType, Environment>::RRTStar()
-    : RRTBase<NodeType, Environment>()
+StateSpacePlan<NodeType, Environment>::StateSpacePlan()
+    : RRT<NodeType, Environment>()
 {
 }
 
 template<typename NodeType, typename Environment>
-RRTStar<NodeType, Environment>::~RRTStar()
+StateSpacePlan<NodeType, Environment>::~StateSpacePlan()
 {
 }
-
 template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::Plan()
+bool StateSpacePlan<NodeType, Environment>::Plan()
 {
   bool success = true;
   int nodeId = 2;
@@ -23,7 +22,6 @@ bool RRTStar<NodeType, Environment>::Plan()
   double debugingTime = 0.0;
   bool foundSolution = false ;
   while (true) {
-    //std::cerr<<"\t"<<iter<<std::endl;
     if (!(iter < this->maxIteration_)) {
       std::cout << "Planner exceeded maximum iteration number." << std::endl;
       break;
@@ -39,35 +37,21 @@ bool RRTStar<NodeType, Environment>::Plan()
     NodeType* qNew = new NodeType(iter);
 
     this->drawRandomConfiguration(qRandom);
-    //std::cerr<<"random : "<<qRandom.getState().transpose()<<std::endl;
 
     this->G_.getNearestVertex(qNearest, qRandom);
-    //std::cerr<<"nearest : "<<qNearest->getState().transpose()<<std::endl;
 
     if(steer(qNew, qNearest, qRandom)) {
       continue;
     }
-    //std::cerr<<"steer : "<<qNew->getState().transpose()<<std::endl;
 
-    if(!findNearNodes(qNew)){
-      //std::cerr<<"No near node"<<std::endl;
-      continue;
-    }
-    //std::cerr<<"number of close nodes : "<<qNew->getNumberOfCloseNodes()<<std::endl;
-
-    qNearest = lowestCostNeighbor(qNew);
-    qNearest->addChild(qNew);
-
-    repairPaths(qNew);
+    this->connectNewNode(qNew, qNearest);
 
     this->G_.addVertex(qNew);
     this->G_.addEdge(qNearest, qNew);
-
     // Debug
     double t = clock();
     this->debugGraphes_.push_back(this->G_);
     debugingTime += (clock()-t);
-
     if (this->isGoalReached(qNew)) {
       this->solutionNodes_.push_back(qNew);
       std::cerr << "iter : " << std::setw(5) <<iter
@@ -80,7 +64,8 @@ bool RRTStar<NodeType, Environment>::Plan()
       this->debugPaths_.push_back(this->backTrackPath(qNew));
       debugingTime += (clock()-t);
       foundSolution = true;
-    }else{
+    }
+    else{
       // Debug
       double t = clock();
       if(foundSolution){
@@ -92,22 +77,22 @@ bool RRTStar<NodeType, Environment>::Plan()
         emptyPath.push_back(this->qGoal_);
         this->debugPaths_.push_back(emptyPath);
       }
-
       debugingTime += (clock()-t);
     }
     iter++;
+    std::cerr<<iter<<std::endl;
   }
+  std::cerr<<"Planning duration : "<<(clock() - startTime - debugingTime) /
+  double(CLOCKS_PER_SEC)<<std::endl;
   this->backTrackPath();
-  std::cerr << "Planning duration : " << (clock() - startTime - debugingTime) / double(CLOCKS_PER_SEC)
-            << std::endl;
+  std::cerr<<"Path is generated!!"<<std::endl;
   return success;
 }
 
-
 template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
+bool StateSpacePlan<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
 {
-  //double deltaQ = 0.5/(sqrt(qNew->getId()/10)+1)+0.5;
+  //double deltaQ = 0.4/(sqrt(qNew->getId()/20)+1)+0.3;
   int n = qNear->getState().size();
   Eigen::MatrixXd deltaQ = Eigen::MatrixXd::Zero(n,n);
   std::random_device rd;
@@ -117,64 +102,9 @@ bool RRTStar<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, Node
   qNew->setState(qNear->getState() + deltaQ * (qRand.getState() - qNear->getState()));
   int trial = 1 ;
   while(trial++<5 && this->environment_->checkCollisions(qNear->getState(), qNew->getState())){
-    //std::cerr<< trial << std::endl;
     qNew->setState(qNear->getState() + deltaQ/pow(2,trial) * (qRand.getState() - qNear->getState()));
   }
-  return this->environment_->checkCollisions(qNear->getState(), qNew->getState());
-}
-
-template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::findNearNodes(NodeType* qNew)
-{
-  double distance = 0.3/(sqrt(qNew->getId()/10)+1)+0.3;
-  for (auto n : this->G_.getVerteces()) {
-    if ((qNew->getState() - n->getState()).norm() < distance
-        && !this->environment_->checkCollisions(n->getState(), qNew->getState())) {
-      qNew->addCloseNode(n);
-    }
-  }
-  return qNew->getNumberOfCloseNodes();
-}
-
-template<typename NodeType, typename Environment>
-NodeType* RRTStar<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
-{
-  NodeType* qNearest;
-  double cost = 100000.0 ;
-  double newCost = 1000.0 ;
-  for (auto n : qNew->getCloseNodes()) {
-    newCost = n->getCost()+ (qNew->getState() - n->getState()).norm();
-    if (newCost < cost) {
-      qNearest = n;
-      cost = newCost;
-    }
-  }
-  qNew->setCost(cost);
-  return qNearest;
-}
-
-
-template<typename NodeType, typename Environment>
-void RRTStar<NodeType, Environment>::repairPaths(NodeType* qNew)
-{
-  for (auto n : qNew->getCloseNodes()) {
-    NodeType* oldParent = n;
-    NodeType* newParent = qNew ;
-    NodeType* tempParent;
-    double newCost;
-    while(true){
-        newCost = oldParent->getCost() + (newParent->getState() - oldParent->getState()).norm();
-        if(oldParent->getCost() > newCost){
-          tempParent = oldParent->getParent();
-          oldParent->setParent(newParent);
-          oldParent->setCost(newCost);
-          newParent = oldParent;
-          oldParent = tempParent;
-        }else{
-          break;
-        }
-    }
-  }
+  return this->environment_->checkCollisions(qNear->getState(),qNew->getState());
 }
 
 }

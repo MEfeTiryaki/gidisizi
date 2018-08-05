@@ -17,8 +17,7 @@ class RRT: public RRTBase<NodeType,Environment>
   virtual bool Plan();
 
 protected:
-  bool steer(NodeType* qNew, NodeType* qNear, NodeType& qRand,
-                                          double deltaQ) override;
+  bool steer(NodeType* qNew, NodeType* qNear, NodeType& qRand) override;
 
 
   virtual void connectNewNode(NodeType* qNew, NodeType* qNearest);

@@ -56,7 +56,7 @@ namespace gidisizi {
    protected:
 
     virtual void drawRandomConfiguration(NodeType& q);
-    virtual bool steer(NodeType* qNew,NodeType* qNear,NodeType& qRand,double deltaQ);
+    virtual bool steer(NodeType* qNew,NodeType* qNear,NodeType& qRand);
 
     bool isGoalReached(NodeType* qNew);
     bool isGoalReachable();

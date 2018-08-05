@@ -114,4 +114,18 @@ int Node<stateLength>::getNumberOfCloseNodes(){
   return closeNodes_.size();
 }
 
+template<int stateLength>
+void Node<stateLength>::addLessCloseNode(gidisizi::Node<stateLength>* node){
+  lessCloseNodes_.push_back(node);
+}
+
+template<int stateLength>
+std::vector<gidisizi::Node<stateLength>*> Node<stateLength>::getLessCloseNodes(){
+  return lessCloseNodes_;
+}
+template<int stateLength>
+int Node<stateLength>::getNumberOfLessCloseNodes(){
+  return lessCloseNodes_.size();
+}
+
 } /* namespace iyi*/

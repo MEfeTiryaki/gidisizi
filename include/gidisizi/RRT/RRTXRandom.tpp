@@ -1,20 +1,20 @@
-#include "gidisizi/RRT/RRTX.hpp"
+#include "gidisizi/RRT/RRTXRandom.hpp"
 
 namespace gidisizi {
 
 template<typename NodeType, typename Environment>
-RRTX<NodeType, Environment>::RRTX()
+RRTXRandom<NodeType, Environment>::RRTXRandom()
     : RRTBase<NodeType, Environment>()
 {
 }
 
 template<typename NodeType, typename Environment>
-RRTX<NodeType, Environment>::~RRTX()
+RRTXRandom<NodeType, Environment>::~RRTXRandom()
 {
 }
 
 template<typename NodeType, typename Environment>
-bool RRTX<NodeType, Environment>::Plan()
+bool RRTXRandom<NodeType, Environment>::Plan()
 {
   bool success = true;
   int nodeId = 2;
@@ -106,7 +106,7 @@ bool RRTX<NodeType, Environment>::Plan()
 }
 
 template<typename NodeType, typename Environment>
-bool RRTX<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
+bool RRTXRandom<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
 {
   //double deltaQ = 0.2/(sqrt(qNew->getId()/10)+1)+0.2;
   int n = qNear->getState().size();
@@ -125,7 +125,7 @@ bool RRTX<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeTyp
 }
 
 template<typename NodeType, typename Environment>
-bool RRTX<NodeType, Environment>::findNearNodes(NodeType* qNew)
+bool RRTXRandom<NodeType, Environment>::findNearNodes(NodeType* qNew)
 {
   double distanceClose = 0.2/(sqrt(qNew->getId()/10)+1)+0.2;
   double distance ;
@@ -142,25 +142,37 @@ bool RRTX<NodeType, Environment>::findNearNodes(NodeType* qNew)
 }
 
 template<typename NodeType, typename Environment>
-NodeType* RRTX<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
+NodeType* RRTXRandom<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
 {
-  NodeType* qNearest;
-  double cost = 100000.0 ;
-  double newCost = 1000.0 ;
-  for (auto n : qNew->getCloseNodes()) {
-    newCost = n->getCost()+ (qNew->getState() - n->getState()).norm();
-    if (newCost < cost) {
-      qNearest = n;
-      cost = newCost;
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  double dice = distribution(generator);
+  if (dice < 0.5){
+    NodeType* qNearest;
+    double cost = 100000.0 ;
+    double newCost = 1000.0 ;
+    for (auto n : qNew->getCloseNodes()) {
+      newCost = n->getCost()+ (qNew->getState() - n->getState()).norm();
+      if (newCost < cost) {
+        qNearest = n;
+        cost = newCost;
+      }
     }
+    qNew->setCost(cost);
+    return qNearest;
   }
-  qNew->setCost(cost);
-  return qNearest;
+  else{
+    auto n = qNew->getCloseNodes()[(int)(( dice -0.5 ) / 2.0*qNew->getNumberOfCloseNodes())];
+    qNew->setCost( n->getCost()+ (qNew->getState() - n->getState()).norm());
+    return n ;
+  }
+
 }
 
 
 template<typename NodeType, typename Environment>
-void RRTX<NodeType, Environment>::repairPaths(NodeType* qNew)
+void RRTXRandom<NodeType, Environment>::repairPaths(NodeType* qNew)
 {
   for (auto n : qNew->getCloseNodes()) {
     NodeType* oldParent = n;
@@ -183,7 +195,7 @@ void RRTX<NodeType, Environment>::repairPaths(NodeType* qNew)
 }
 
 template<typename NodeType, typename Environment>
-void RRTX<NodeType, Environment>::repairWire()
+void RRTXRandom<NodeType, Environment>::repairWire()
 {
   double newCost;
   for (auto vertex : this->G_.getVerteces()) {

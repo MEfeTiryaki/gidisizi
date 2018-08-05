@@ -17,7 +17,7 @@ void testRRTStar(){
 
   gidisizi::RRTStar<NodeType_,Environment_> RRTStar_ = gidisizi::RRTStar<NodeType_,Environment_>();
   int nodeId = 0;
-  NodeType_* q_init = new NodeType_(nodeId++, Eigen::Vector2d(-0.7,0.8));
+  NodeType_* q_init = new NodeType_(nodeId++, Eigen::Vector2d(-0.7,0.9));
   NodeType_* q_goal = new NodeType_(nodeId++, Eigen::Vector2d(0.8,-0.8));
   Eigen::VectorXd upper = Eigen::VectorXd::Ones(2);
   Eigen::VectorXd lower = -Eigen::VectorXd::Ones(2);

@@ -78,7 +78,7 @@ namespace path_vis{
     cv::Scalar solution = cv::Scalar(255, 0, 0);
     cv::Scalar goalcolor = cv::Scalar(255, 0, 255);
     cv::Scalar wallcolor = cv::Scalar(0, 0, 255);
-
+    cv::Scalar  carColor = cv::Scalar(0, 255, 255);
     cv::Mat img = cv::Mat::zeros(w, w, CV_8UC3);
 
     for (auto wall : environment->getWalls()) {
@@ -128,9 +128,20 @@ namespace path_vis{
         cv::line(img, cv::Point(w / 2 * (1 + start->getState()[0]), w / 2 * (1 - start->getState()[1])),
                  cv::Point(w / 2 * (1 + end->getState()[0]), w / 2 * (1 - end->getState()[1])),
                  solution, thickness * 5, lineType);
+
+        if (start->getState().size()==3){
+          double x = cos(start->getState()[2])*0.2;
+          double y = sin(start->getState()[2])*0.2;
+          cv::arrowedLine(img, cv::Point( w / 2 * (1 + start->getState()[0]-x)
+                                        , w / 2 * (1 - start->getState()[1]-y))
+                             , cv::Point( w / 2 * (1 + start->getState()[0]+x)
+                                        , w / 2 * (1 - start->getState()[1]+y))
+                             , carColor, thickness * 5);
+        }
+
       }
       cv::imshow("Display window", img);
-      cv::waitKey(10);
+      cv::waitKey(1);
       index++;//std::cerr<<(index++)<<std::endl;
     }
     std::cerr<<"Press a key to stop!!"<<std::endl;

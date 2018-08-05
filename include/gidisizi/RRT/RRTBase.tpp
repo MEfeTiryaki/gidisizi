@@ -109,9 +109,9 @@ namespace gidisizi {
   }
 
   template<typename NodeType, typename Environment>
-  bool RRTBase<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand,
-                                          double deltaQ)
+  bool RRTBase<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
   {
+    double deltaQ = 1.0;
     qNew->setState(qNear->getState() + deltaQ * (qRand.getState() - qNear->getState()));
     return environment_->checkCollisions(qNear->getState(),qNew->getState());
   }
