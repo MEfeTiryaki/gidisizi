@@ -54,8 +54,10 @@ bool RRT<NodeType, Environment>::Plan()
 
     connectNewNode(qNew, qNearest);
 
+    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
+    qNew->setPathToThis(edge);
     this->G_.addVertex(qNew);
-    this->G_.addEdge(qNearest, qNew);
+    this->G_.addEdge(edge);
     // Debug
     double t = clock();
     this->debugGraphes_.push_back(this->G_);
@@ -83,6 +85,8 @@ bool RRT<NodeType, Environment>::Plan()
         std::vector<NodeType*> emptyPath;
         emptyPath.push_back(this->qInit_);
         emptyPath.push_back(this->qGoal_);
+        gidisizi::Line* edge = new gidisizi::Line(this->qInit_->getState(), this->qGoal_->getState());
+        this->qGoal_->setPathToThis(edge);
         this->debugPaths_.push_back(emptyPath);
       }
       debugingTime += (clock()-t);

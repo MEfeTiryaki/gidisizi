@@ -5,7 +5,7 @@ template<typename NodeType>
 Graph<NodeType>::Graph()
 {
   verteces_ = std::vector<NodeType*>(0);
-  edges_ = std::vector< gidisizi::Edge<NodeType>> (0);
+  edges_ = std::vector< gidisizi::Curve*> (0);
 }
 template<typename NodeType>
 Graph<NodeType>::~Graph()
@@ -26,21 +26,13 @@ void Graph<NodeType>::addVertex(NodeType* v)
 }
 
 template<typename NodeType>
-void Graph<NodeType>::addEdge(NodeType* s, NodeType* e)
-{
-  gidisizi::Edge<NodeType> edge;
-  edge.start = s;
-  edge.end = e;
-  addEdge(edge);
-}
-template<typename NodeType>
-void Graph<NodeType>::addEdge(gidisizi::Edge<NodeType> edge)
+void Graph<NodeType>::addEdge(gidisizi::Curve* edge)
 {
   edges_.push_back(edge);
 }
 
 template<typename NodeType>
-std::vector<gidisizi::Edge<NodeType>> Graph<NodeType>::getEdges()
+std::vector<gidisizi::Curve*> Graph<NodeType>::getEdges()
 {
   return edges_;
 }

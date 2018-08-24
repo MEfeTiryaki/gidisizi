@@ -1,28 +1,26 @@
 #pragma once
 
-#include "gidisizi/RRT/RRTBase.hpp"
+#include "gidisizi/RRT/RRTStar.hpp"
 #include "gidisizi/utils/Line.hpp"
 
 namespace gidisizi {
 template<typename NodeType,typename Environment>
-class RRTXRandom:public RRTBase< NodeType, Environment>
+class B_RRTStar : public RRTStar<NodeType,Environment>
 {
  public:
   // Constructor.
-  RRTXRandom();
+  B_RRTStar();
   // Destructor.
-  virtual ~RRTXRandom();
+  virtual ~B_RRTStar();
 
-  virtual bool Plan();
+  virtual bool Plan() override;
 
  protected:
-
   virtual bool steer(NodeType* qNew,NodeType* qNear,NodeType& qRand);
   virtual bool findNearNodes(NodeType* qNew);
   virtual NodeType* lowestCostNeighbor(NodeType* qNew);
   void repairPaths(NodeType* qNew);
-  void repairWire();
 
 };
 }  // gidisizi
-#include "gidisizi/RRT/RRTXRandom.tpp"
+#include "gidisizi/RRT/B_RRTStar.tpp"

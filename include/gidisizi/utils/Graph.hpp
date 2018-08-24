@@ -6,12 +6,7 @@
 
 #include <iostream>
 namespace gidisizi {
-template<typename NodeType>
-struct Edge
-{
-  NodeType* start;
-  NodeType* end;
-};
+
 template<typename NodeType>
 class Graph
 {
@@ -26,9 +21,8 @@ class Graph
 
   virtual void addVertex(NodeType* v);
 
-  virtual void addEdge(NodeType* s,NodeType* e);
-  virtual void addEdge(gidisizi::Edge<NodeType> edge);
-  virtual std::vector<gidisizi::Edge<NodeType>> getEdges();
+  virtual void addEdge(gidisizi::Curve* edge);
+  virtual std::vector<gidisizi::Curve*> getEdges();
 
   virtual std::vector<NodeType*> getVerteces();
 
@@ -36,7 +30,7 @@ class Graph
 
  protected:
   std::vector<NodeType*> verteces_;
-  std::vector<gidisizi::Edge<NodeType>> edges_;
+  std::vector<gidisizi::Curve*> edges_;
 
 };
 }  // gidisizi

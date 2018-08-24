@@ -60,8 +60,10 @@ bool RRTX<NodeType, Environment>::Plan()
 
     repairPaths(qNew);
 
+    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
+    qNew->setPathToThis(edge);
     this->G_.addVertex(qNew);
-    this->G_.addEdge(qNearest, qNew);
+    this->G_.addEdge(edge);
 
     repairWire();
 
@@ -93,6 +95,8 @@ bool RRTX<NodeType, Environment>::Plan()
         emptyPath.push_back(this->qInit_);
         emptyPath.push_back(this->qGoal_);
         this->debugPaths_.push_back(emptyPath);
+        gidisizi::Line* edge = new gidisizi::Line(this->qInit_->getState(), this->qGoal_->getState());
+        this->qGoal_->setPathToThis(edge);
       }
       debugingTime += (clock()-t);
     }
@@ -159,6 +163,7 @@ NodeType* RRTX<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
 }
 
 
+// TODO : FIX THIS ONE FOR CURVE
 template<typename NodeType, typename Environment>
 void RRTX<NodeType, Environment>::repairPaths(NodeType* qNew)
 {
@@ -192,6 +197,8 @@ void RRTX<NodeType, Environment>::repairWire()
       if(vertex->getCost() > newCost){
         vertex->setParent(parrentCandidate);
         vertex->setCost(newCost);
+        gidisizi::Line* edge = new gidisizi::Line(parrentCandidate->getState(), vertex->getState());
+        vertex->setPathToThis(edge);
       }
     }
   }

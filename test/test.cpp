@@ -3,7 +3,8 @@
 #include "gidisizi/utils/Node.hpp"
 #include "gidisizi/Environment2D.hpp"
 #include "gidisizi/utils/visualization.hpp"
-
+#include "gidisizi/utils/Bezier3.hpp"
+#include "gidisizi/utils/Line.hpp"
 int counter = 0;
 using NodeType_ = gidisizi::Node<2>;
 using Environment_ = gidisizi::Environment2d;
@@ -145,11 +146,26 @@ void testEnvironment(){
   }
 }
 
+void testGeometries(){
+  gidisizi::Bezier3* b =new gidisizi::Bezier3(Eigen::Vector2d(0.0,0.0)
+                   ,Eigen::Vector2d(1.0,1.0)
+                   ,Eigen::Vector2d(1.0,-0.5));
+  gidisizi::Line* l = new gidisizi::Line(Eigen::Vector2d(-0.5,-0.5)
+                  ,Eigen::Vector2d(0.5,-0.5));
+  b->setControlPointParameter(1.0);
+
+  std::vector<gidisizi::Curve*> curves;
+  curves.push_back(b);
+  curves.push_back(l);
+
+  path_vis::drawTest(curves);
+}
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "test");
   ros::NodeHandle nh;
-  testNode();
-  testEnvironment();
+  //testNode();
+  //testEnvironment();
+  testGeometries();
   return 0;
 }

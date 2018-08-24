@@ -1,19 +1,20 @@
-#include "gidisizi/examples/RRTNonHolonomic.hpp"
+#include "gidisizi/RRT/RRT.hpp"
 
 namespace gidisizi {
 
 template<typename NodeType, typename Environment>
-RRTNonHolonomic<NodeType, Environment>::RRTNonHolonomic()
+B_RRT<NodeType, Environment>::B_RRT()
     : RRT<NodeType, Environment>()
 {
 }
 
 template<typename NodeType, typename Environment>
-RRTNonHolonomic<NodeType, Environment>::~RRTNonHolonomic()
+B_RRT<NodeType, Environment>::~B_RRT()
 {
 }
+
 template<typename NodeType, typename Environment>
-bool RRTNonHolonomic<NodeType, Environment>::Plan()
+bool B_RRT<NodeType, Environment>::Plan()
 {
   bool success = true;
   int nodeId = 2;
@@ -46,10 +47,7 @@ bool RRTNonHolonomic<NodeType, Environment>::Plan()
 
     this->connectNewNode(qNew, qNearest);
 
-    this->G_.addVertex(qNew);
-    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
-    qNew->setPathToThis(edge);
-    this->G_.addEdge(edge);
+
     // Debug
     double t = clock();
     this->debugGraphes_.push_back(this->G_);
@@ -77,21 +75,21 @@ bool RRTNonHolonomic<NodeType, Environment>::Plan()
         std::vector<NodeType*> emptyPath;
         emptyPath.push_back(this->qInit_);
         emptyPath.push_back(this->qGoal_);
+        gidisizi::Line* edge = new gidisizi::Line(this->qInit_->getState(), this->qGoal_->getState());
+        this->qGoal_->setPathToThis(edge);
         this->debugPaths_.push_back(emptyPath);
       }
       debugingTime += (clock()-t);
     }
     iter++;
   }
-  std::cerr<<"Planning duration : "<<(clock() - startTime - debugingTime) /
-  double(CLOCKS_PER_SEC)<<std::endl;
   this->backTrackPath();
-  std::cerr<<"Path is generated!!"<<std::endl;
+  std::cerr<<"Planning duration : "<<(clock() - startTime - debugingTime) / double(CLOCKS_PER_SEC)<<std::endl;
   return success;
 }
 
 template<typename NodeType, typename Environment>
-bool RRTNonHolonomic<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
+bool B_RRT<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
 {
   //double deltaQ = 0.4/(sqrt(qNew->getId()/20)+1)+0.3;
   int n = qNear->getState().size();
@@ -101,12 +99,31 @@ bool RRTNonHolonomic<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNe
   std::uniform_real_distribution<double> distribution(0.0, 1.0);
   deltaQ.diagonal() = Eigen::VectorXd::Ones(n)*distribution(generator);
   qNew->setState(qNear->getState() + deltaQ * (qRand.getState() - qNear->getState()));
-  int trial = 1 ;
-  while(trial++<5 && this->environment_->checkCollisions(qNear->getState(), qNew->getState())){
-    qNew->setState(qNear->getState() + deltaQ/pow(2,trial) * (qRand.getState() - qNear->getState()));
-  }
+
   return this->environment_->checkCollisions(qNear->getState(),qNew->getState());
 }
+
+template<typename NodeType, typename Environment>
+void B_RRT<NodeType, Environment>::connectNewNode(NodeType* qNew, NodeType* qNearest)
+{
+  qNearest->addChild(qNew);
+  qNew->setCost(qNearest->getCost()+ (qNew->getState() - qNearest->getState()).norm());
+
+  Eigen::VectorXd startingDirection ;
+  if(qNearest == this->qInit_){
+    startingDirection = (qNew->getState()-qNearest->getState()).normalized();
+  }else{
+    startingDirection = dynamic_cast<gidisizi::Bezier3*> (qNearest->getPathToThis())->getFirstDerivative(1.0).normalized();
+  }
+  gidisizi::Bezier3* edge = new gidisizi::Bezier3( qNearest->getState()
+                                                 , qNew->getState()
+                                                 , startingDirection);
+  edge->setControlPointParameter(0.1);
+  qNew->setPathToThis(edge);
+  this->G_.addVertex(qNew);
+  this->G_.addEdge(edge);
+}
+
 
 }
 /* namespace gidisizi*/

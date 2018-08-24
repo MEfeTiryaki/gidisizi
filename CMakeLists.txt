@@ -62,6 +62,16 @@ target_link_libraries(rrt
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
+add_executable(b_rrt
+  test/testRRTBezier.cpp
+)
+add_dependencies(b_rrt
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(b_rrt
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
 
 add_executable(rrt_star
   test/testRRTStar.cpp
@@ -84,26 +94,26 @@ target_link_libraries(rrt_rewired
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
-add_executable(rrt_ss
-  test/testRRTSS.cpp
-)
-add_dependencies(rrt_ss
-  ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(rrt_ss
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
-add_executable(rrt_car
-  test/testRRTNonHolonomic.cpp
-)
-add_dependencies(rrt_car
-  ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(rrt_car
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
+#add_executable(rrt_ss
+#  test/testRRTSS.cpp
+#)
+#add_dependencies(rrt_ss
+#  ${catkin_EXPORTED_TARGETS}
+#)
+#target_link_libraries(rrt_ss
+#  ${catkin_LIBRARIES}
+#  ${OpenCV_LIBRARIES}
+#)
+#add_executable(rrt_car
+#  test/testRRTNonHolonomic.cpp
+#)
+#add_dependencies(rrt_car
+#  ${catkin_EXPORTED_TARGETS}
+#)
+#target_link_libraries(rrt_car
+#  ${catkin_LIBRARIES}
+#  ${OpenCV_LIBRARIES}
+#)
 
 install(
   DIRECTORY include/${PROJECT_NAME}/

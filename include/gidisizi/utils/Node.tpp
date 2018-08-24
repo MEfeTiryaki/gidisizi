@@ -128,4 +128,15 @@ int Node<stateLength>::getNumberOfLessCloseNodes(){
   return lessCloseNodes_.size();
 }
 
+
+template<int stateLength>
+void Node<stateLength>::setPathToThis(gidisizi::Curve* path){
+  pathToThis_ = path;
+}
+
+template<int stateLength>
+gidisizi::Curve* Node<stateLength>::getPathToThis(){
+  return pathToThis_;
+}
+
 } /* namespace iyi*/

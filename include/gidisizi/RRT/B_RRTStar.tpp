@@ -1,20 +1,20 @@
-#include "gidisizi/RRT/RRTStar.hpp"
+#include "gidisizi/RRT/B_RRTStar.hpp"
 
 namespace gidisizi {
 
 template<typename NodeType, typename Environment>
-RRTStar<NodeType, Environment>::RRTStar()
-    : RRTBase<NodeType, Environment>()
+B_RRTStar<NodeType, Environment>::B_RRTStar()
+    : RRTStar<NodeType, Environment>()
 {
 }
 
 template<typename NodeType, typename Environment>
-RRTStar<NodeType, Environment>::~RRTStar()
+B_RRTStar<NodeType, Environment>::~B_RRTStar()
 {
 }
 
 template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::Plan()
+bool B_RRTStar<NodeType, Environment>::Plan()
 {
   bool success = true;
   int nodeId = 2;
@@ -60,7 +60,17 @@ bool RRTStar<NodeType, Environment>::Plan()
 
     repairPaths(qNew);
 
-    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
+    Eigen::VectorXd startingDirection ;
+    if(qNew->getParent() == this->qInit_){
+      startingDirection = (qNew->getState()-qNew->getParent()->getState()).normalized();
+    }else{
+      startingDirection = dynamic_cast<gidisizi::Bezier3*> (qNew->getParent()->getPathToThis())->getFirstDerivative(1.0).normalized();
+    }
+
+    gidisizi::Bezier3* edge = new gidisizi::Bezier3( qNearest->getState()
+                                                   , qNew->getState()
+                                                   , startingDirection);
+    edge->setControlPointParameter(0.1);
     qNew->setPathToThis(edge);
     this->G_.addVertex(qNew);
     this->G_.addEdge(edge);
@@ -109,7 +119,7 @@ bool RRTStar<NodeType, Environment>::Plan()
 
 
 template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
+bool B_RRTStar<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, NodeType& qRand)
 {
   //double deltaQ = 0.5/(sqrt(qNew->getId()/10)+1)+0.5;
   int n = qNear->getState().size();
@@ -128,7 +138,7 @@ bool RRTStar<NodeType, Environment>::steer(NodeType* qNew, NodeType* qNear, Node
 }
 
 template<typename NodeType, typename Environment>
-bool RRTStar<NodeType, Environment>::findNearNodes(NodeType* qNew)
+bool B_RRTStar<NodeType, Environment>::findNearNodes(NodeType* qNew)
 {
   double distance = 0.3/(sqrt(qNew->getId()/10)+1)+0.3;
   for (auto n : this->G_.getVerteces()) {
@@ -141,7 +151,7 @@ bool RRTStar<NodeType, Environment>::findNearNodes(NodeType* qNew)
 }
 
 template<typename NodeType, typename Environment>
-NodeType* RRTStar<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
+NodeType* B_RRTStar<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
 {
   NodeType* qNearest;
   double cost = 100000.0 ;
@@ -159,7 +169,7 @@ NodeType* RRTStar<NodeType, Environment>::lowestCostNeighbor(NodeType* qNew)
 
 
 template<typename NodeType, typename Environment>
-void RRTStar<NodeType, Environment>::repairPaths(NodeType* qNew)
+void B_RRTStar<NodeType, Environment>::repairPaths(NodeType* qNew)
 {
   for (auto n : qNew->getCloseNodes()) {
     NodeType* oldParent = n;

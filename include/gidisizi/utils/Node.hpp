@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Eigen/Dense"
+#include "gidisizi/utils/Curve.hpp"
 
 namespace gidisizi {
 
@@ -54,8 +55,12 @@ class Node
   void addLessCloseNode(gidisizi::Node<stateLength>* node);
   std::vector<gidisizi::Node<stateLength>*> getLessCloseNodes();
   int getNumberOfLessCloseNodes();
-  
+
+  void setPathToThis(gidisizi::Curve* path);
+  gidisizi::Curve* getPathToThis();
+
  protected:
+
   int id_;
   Eigen::VectorXd state_;
 
@@ -63,6 +68,7 @@ class Node
 
   std::vector<gidisizi::Node<stateLength>*> children_;
   gidisizi::Node<stateLength>* parent_;
+  gidisizi::Curve* pathToThis_;
 
   std::vector<gidisizi::Node<stateLength>*> closeNodes_;
   std::vector<gidisizi::Node<stateLength>*> lessCloseNodes_;

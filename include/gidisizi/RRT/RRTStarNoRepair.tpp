@@ -87,8 +87,10 @@ bool RRTStarNoRepair<NodeType, Environment>::Plan()
 
     lowestCostNeighbor(qNew)->addChild(qNew);
 
-    G_.addVertex(qNew);
-    G_.addEdge(qNearest, qNew);
+    this->G_.addVertex(qNew);
+    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
+    qNew->setPathToThis(edge);
+    this->G_.addEdge(edge);
     if (isGoalReached(qNew)) {
       solutionNode_ = qNew;
       break;

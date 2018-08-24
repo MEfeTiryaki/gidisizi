@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gidisizi/RRT/RRTBase.hpp"
+#include "gidisizi/utils/Line.hpp"
 
 namespace gidisizi {
 template<typename NodeType,typename Environment>

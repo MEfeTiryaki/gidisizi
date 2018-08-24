@@ -61,8 +61,10 @@ bool RRTXRandom<NodeType, Environment>::Plan()
     repairPaths(qNew);
 
     this->G_.addVertex(qNew);
-    this->G_.addEdge(qNearest, qNew);
-
+    gidisizi::Line* edge = new gidisizi::Line(qNearest->getState(), qNew->getState());
+    qNew->setPathToThis(edge);
+    this->G_.addEdge(edge);
+    
     repairWire();
 
     // Debug
