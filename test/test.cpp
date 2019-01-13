@@ -3,6 +3,7 @@
 #include "gidisizi/utils/Node.hpp"
 #include "gidisizi/Environment2D.hpp"
 #include "gidisizi/utils/visualization.hpp"
+#include <openrave-core.h>
 
 int counter = 0;
 using NodeType_ = gidisizi::Node<2>;

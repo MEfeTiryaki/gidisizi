@@ -11,6 +11,8 @@ find_package(catkin REQUIRED
 # to use eigen library
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV)
+
+
 catkin_package(
   INCLUDE_DIRS
   	include
@@ -20,7 +22,6 @@ catkin_package(
     roscpp
   DEPENDS
 )
-
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIR}
